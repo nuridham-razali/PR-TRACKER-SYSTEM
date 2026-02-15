@@ -82,13 +82,26 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  // Helper to format date YYYY-MM-DD to DD-MM-YYYY
+  // Helper to format date ISO/YYYY-MM-DD to DD-MM-YYYY (Local Time)
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';
-    const parts = dateStr.split('-');
-    if (parts.length === 3) {
-        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    
+    // Attempt to parse as a Date object first to handle timezones and ISO strings correctly
+    // This fixes the issue where 2026-02-14T16:00:00.000Z (UTC) shows as 14th instead of 15th (Local)
+    const date = new Date(dateStr);
+    if (!isNaN(date.getTime())) {
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
     }
+
+    // Fallback: simple string manipulation for YYYY-MM-DD if Date parse fails
+    if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [y, m, d] = dateStr.split('-');
+        return `${d}-${m}-${y}`;
+    }
+
     return dateStr;
   };
 
@@ -149,7 +162,7 @@ export const Dashboard: React.FC = () => {
                             <label className="text-sm font-semibold text-slate-700">Date</label>
                             <input 
                                 type="date" 
-                                value={editingRecord.date}
+                                value={editingRecord.date.split('T')[0]} 
                                 onChange={(e) => setEditingRecord({...editingRecord, date: e.target.value})}
                                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-black"
                             />
