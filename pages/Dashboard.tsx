@@ -82,6 +82,16 @@ export const Dashboard: React.FC = () => {
     }
   };
 
+  // Helper to format date YYYY-MM-DD to DD-MM-YYYY
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateStr;
+  };
+
   // Filter Logic
   const filteredRecords = records.filter(record => {
     const matchesSearch = 
@@ -287,7 +297,7 @@ export const Dashboard: React.FC = () => {
                 filteredRecords.map((record) => (
                   <tr key={record.id} className="hover:bg-slate-50 transition-colors group">
                     <td className="p-4 font-medium text-slate-900">{record.prNumber}</td>
-                    <td className="p-4 text-slate-600 text-sm">{record.date}</td>
+                    <td className="p-4 text-slate-600 text-sm">{formatDate(record.date)}</td>
                     <td className="p-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                         ${record.requestedBy === UserRole.USER_1 ? 'bg-blue-100 text-blue-800' : 
