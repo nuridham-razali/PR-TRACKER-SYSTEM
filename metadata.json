@@ -1,0 +1,5 @@
+{
+  "name": "PR Tracker Pro",
+  "description": "A purchase requisition tracking system to prevent duplicates and manage internal requests.",
+  "requestFramePermissions": []
+}
