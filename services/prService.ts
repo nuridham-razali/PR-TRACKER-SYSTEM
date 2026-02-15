@@ -1,11 +1,14 @@
 import { PRRecord } from '../types';
 
-// TODO: REPLACE THIS URL WITH YOUR GOOGLE APPS SCRIPT WEB APP URL
-// If the URL contains 'YOUR_SCRIPT_ID_HERE', the app will fallback to LocalStorage.
+// REPLACED: Default to LocalStorage for the demo to ensure it works immediately on GitHub Pages.
+// To use Google Sheets, replace the URL below with your deployed Web App URL and set forceApi = true.
 const API_URL = 'https://script.google.com/macros/s/AKfycbzaQdneTddZnX5VqIOFeinvs3aMHdP-aV48Th3iffDKmY7DQgUu-SFdpHugdFPd2wM6/exec'; 
 
+// Change this to true ONLY after you have pasted your valid Google Script URL above.
+const forceApi = false; 
+
 const STORAGE_KEY = 'pr_tracker_data';
-const USE_API = !API_URL.includes('YOUR_SCRIPT_ID_HERE');
+const USE_API = forceApi && API_URL.includes('script.google.com');
 
 // --- Local Storage Helpers ---
 const getLocalRecords = (): PRRecord[] => {
@@ -34,9 +37,8 @@ const deleteLocalRecord = (id: string) => {
 
 export const getPRRecords = async (): Promise<PRRecord[]> => {
   if (!USE_API) {
-    console.warn("Google Sheets API URL not configured. Using LocalStorage.");
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Simulate network delay for better UX feel
+    await new Promise(resolve => setTimeout(resolve, 300));
     return getLocalRecords();
   }
 
@@ -47,7 +49,8 @@ export const getPRRecords = async (): Promise<PRRecord[]> => {
     return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error("Error fetching from Google Sheets", error);
-    throw error;
+    // Fallback to local if API fails
+    return getLocalRecords();
   }
 };
 
@@ -69,14 +72,19 @@ export const savePRRecord = async (record: PRRecord): Promise<void> => {
     return;
   }
 
-  // using text/plain content type to avoid CORS preflight issues with Google Apps Script
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'ADD', record }),
-  });
-  
-  if (!response.ok) {
-     throw new Error("Failed to save to Google Sheets");
+  try {
+    // using text/plain content type to avoid CORS preflight issues with Google Apps Script
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'ADD', record }),
+    });
+    
+    if (!response.ok) {
+        throw new Error("Failed to save to Google Sheets");
+    }
+  } catch (e) {
+      console.error("API Save failed, falling back to local", e);
+      saveLocalRecord(record);
   }
 };
 
@@ -86,13 +94,18 @@ export const deletePRRecord = async (id: string): Promise<void> => {
     return;
   }
 
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'DELETE', id }),
-  });
-  
-  if (!response.ok) {
-     throw new Error("Failed to delete from Google Sheets");
+  try {
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'DELETE', id }),
+    });
+    
+    if (!response.ok) {
+        throw new Error("Failed to delete from Google Sheets");
+    }
+  } catch (e) {
+      console.error("API Delete failed, falling back to local", e);
+      deleteLocalRecord(id);
   }
 };
 
@@ -138,11 +151,11 @@ export const getNextProposedPRNumber = async (): Promise<string> => {
 };
 
 export const seedDataIfEmpty = () => {
-  if (!USE_API) {
-      if (!localStorage.getItem(STORAGE_KEY)) {
+    // Always check local storage for seed, even if using API, to have something in fallback
+    if (!localStorage.getItem(STORAGE_KEY)) {
         const currentYear = new Date().getFullYear();
         const seed: PRRecord[] = [
-          {
+            {
             id: '1',
             prNumber: `ADMIN/${currentYear}/001`,
             date: `${currentYear}-10-25`,
@@ -150,8 +163,8 @@ export const seedDataIfEmpty = () => {
             vendor: 'Office Depot',
             description: 'Office supplies for Q4',
             timestamp: Date.now() - 10000000
-          },
-          {
+            },
+            {
             id: '2',
             prNumber: `ADMIN/${currentYear}/002`,
             date: `${currentYear}-10-26`,
@@ -159,9 +172,8 @@ export const seedDataIfEmpty = () => {
             vendor: 'Tech Solutions Inc',
             description: 'New monitor for design team',
             timestamp: Date.now() - 5000000
-          }
+            }
         ];
         localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-      }
-  }
+    }
 };
