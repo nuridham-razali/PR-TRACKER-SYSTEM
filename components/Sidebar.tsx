@@ -20,8 +20,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, curre
   return (
     <div className="w-64 bg-white text-black flex flex-col h-screen fixed left-0 top-0 shadow-lg z-10 hidden md:flex border-r border-slate-200">
       <div className="p-6 border-b border-slate-100">
-        <h1 className="text-2xl font-bold tracking-tight text-indigo-600">ADMIN PR</h1>
-        <p className="text-xs text-slate-500 mt-1">PR Tracker Management System</p>
+        <h1 className="text-2xl font-bold tracking-tight text-indigo-600">ADMIN PR NUMBER</h1>
+        <p className="text-xs text-slate-500 mt-1">PR NO Tracker Management System</p>
       </div>
 
       <nav className="flex-1 p-4 space-y-2">
