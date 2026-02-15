@@ -26,6 +26,26 @@ export const CheckAvailability: React.FC = () => {
     }
   };
 
+  // Helper to format date ISO/YYYY-MM-DD to DD-MM-YYYY (Local Time)
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    
+    const date = new Date(dateStr);
+    if (!isNaN(date.getTime())) {
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
+
+    if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [y, m, d] = dateStr.split('-');
+        return `${d}-${m}-${y}`;
+    }
+
+    return dateStr;
+  };
+
   return (
     <div className="max-w-xl mx-auto mt-10">
       <div className="text-center mb-8">
@@ -81,7 +101,7 @@ export const CheckAvailability: React.FC = () => {
                       </div>
                       <div className="space-y-1">
                         <span className="text-slate-500 flex items-center gap-1"><Calendar size={14} /> Date Used</span>
-                        <p className="font-semibold text-slate-800">{result.record.date}</p>
+                        <p className="font-semibold text-slate-800">{formatDate(result.record.date)}</p>
                       </div>
                       <div className="col-span-2 space-y-1 pt-2 border-t border-slate-100">
                         <span className="text-slate-500 flex items-center gap-1"><ShoppingBag size={14} /> Vendor</span>
