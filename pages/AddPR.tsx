@@ -18,8 +18,17 @@ export const AddPR: React.FC<AddPRProps> = ({ currentUser, onSaveSuccess }) => {
     const [selectedYear, setSelectedYear] = useState(currentYear.toString());
     const [sequence, setSequence] = useState('');
     
+    // Get local date string YYYY-MM-DD
+    const getLocalDateString = () => {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const [formData, setFormData] = useState({
-        date: new Date().toISOString().split('T')[0],
+        date: getLocalDateString(),
         requestedBy: currentUser,
         vendor: '',
         description: ''
@@ -89,7 +98,7 @@ export const AddPR: React.FC<AddPRProps> = ({ currentUser, onSaveSuccess }) => {
             setSequence('');
             setFormData(prev => ({
                 ...prev,
-                date: new Date().toISOString().split('T')[0],
+                date: getLocalDateString(),
                 vendor: '',
                 description: ''
             }));
