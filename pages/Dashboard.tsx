@@ -82,26 +82,32 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  // Helper to format date ISO/YYYY-MM-DD to DD-MM-YYYY (Local Time)
+  // Helper to format date
   const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
+    if (!dateStr) return '-';
     
-    // Attempt to parse as a Date object first to handle timezones and ISO strings correctly
-    // This fixes the issue where 2026-02-14T16:00:00.000Z (UTC) shows as 14th instead of 15th (Local)
-    const date = new Date(dateStr);
-    if (!isNaN(date.getTime())) {
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}-${month}-${year}`;
-    }
-
-    // Fallback: simple string manipulation for YYYY-MM-DD if Date parse fails
-    if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    // 1. Handle "YYYY-MM-DD" (exact date, no time) -> keep as is, just reformat to DD-MM-YYYY
+    // We use a strict regex to ensure we don't accidentally match ISO strings here
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
         const [y, m, d] = dateStr.split('-');
         return `${d}-${m}-${y}`;
     }
 
+    // 2. Handle ISO strings (e.g., 2026-02-14T16:00:00.000Z)
+    // Convert to Local Time using Date object
+    try {
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+    } catch (e) {
+        // ignore error
+    }
+
+    // 3. Fallback
     return dateStr;
   };
 
